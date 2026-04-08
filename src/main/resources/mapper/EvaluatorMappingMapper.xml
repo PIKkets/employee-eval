@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.evaluation.employee_eval.mapper.EvaluatorMappingMapper">
+    
+    <select id="findAll" resultType="EvaluatorMapping">
+        SELECT m.*, 
+               e1.name as evaluateeName, d1.name as evaluateeDeptName,
+               e2.name as evaluatorName, d2.name as evaluatorDeptName
+        FROM EVALUATOR_MAPPING m
+        JOIN EMPLOYEE e1 ON m.evaluatee_id = e1.id
+        LEFT JOIN DEPARTMENT d1 ON e1.department_id = d1.id
+        JOIN EMPLOYEE e2 ON m.evaluator_id = e2.id
+        LEFT JOIN DEPARTMENT d2 ON e2.department_id = d2.id
+        ORDER BY m.id DESC
+    </select>
+    
+    <select id="findById" resultType="EvaluatorMapping">
+        SELECT m.*, 
+               e1.name as evaluateeName, d1.name as evaluateeDeptName,
+               e2.name as evaluatorName, d2.name as evaluatorDeptName
+        FROM EVALUATOR_MAPPING m
+        JOIN EMPLOYEE e1 ON m.evaluatee_id = e1.id
+        LEFT JOIN DEPARTMENT d1 ON e1.department_id = d1.id
+        JOIN EMPLOYEE e2 ON m.evaluator_id = e2.id
+        LEFT JOIN DEPARTMENT d2 ON e2.department_id = d2.id
+        WHERE m.id = #{id}
+    </select>
+
+    <select id="findByEvaluatorAndType" resultType="EvaluatorMapping">
+        SELECT m.*, 
+               e1.name as evaluateeName, d1.name as evaluateeDeptName,
+               e2.name as evaluatorName, d2.name as evaluatorDeptName
+        FROM EVALUATOR_MAPPING m
+        JOIN EMPLOYEE e1 ON m.evaluatee_id = e1.id
+        LEFT JOIN DEPARTMENT d1 ON e1.department_id = d1.id
+        JOIN EMPLOYEE e2 ON m.evaluator_id = e2.id
+        LEFT JOIN DEPARTMENT d2 ON e2.department_id = d2.id
+        WHERE m.evaluator_id = #{evaluatorId} AND m.eval_type = #{evalType}
+    </select>
+    
+    <select id="findByEvaluateeAndEvaluatorAndType" resultType="EvaluatorMapping">
+        SELECT m.*, 
+               e1.name as evaluateeName, d1.name as evaluateeDeptName,
+               e2.name as evaluatorName, d2.name as evaluatorDeptName
+        FROM EVALUATOR_MAPPING m
+        JOIN EMPLOYEE e1 ON m.evaluatee_id = e1.id
+        LEFT JOIN DEPARTMENT d1 ON e1.department_id = d1.id
+        JOIN EMPLOYEE e2 ON m.evaluator_id = e2.id
+        LEFT JOIN DEPARTMENT d2 ON e2.department_id = d2.id
+        WHERE m.evaluatee_id = #{evaluateeId} 
+          AND m.evaluator_id = #{evaluatorId} 
+          AND m.eval_type = #{evalType}
+    </select>
+    
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO EVALUATOR_MAPPING (evaluatee_id, evaluator_id, eval_type) 
+        VALUES (#{evaluateeId}, #{evaluatorId}, #{evalType})
+    </insert>
+    
+    <delete id="delete">
+        DELETE FROM EVALUATOR_MAPPING WHERE id = #{id}
+    </delete>
+
+</mapper>

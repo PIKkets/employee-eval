@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{layout/base :: head('평가자 매핑 - 사원 평가 시스템')}"></th:block>
+</head>
+<body class="bg-light">
+    
+    <div class="d-flex wrapper">
+        <th:block th:replace="~{fragments/sidebar :: sidebar}"></th:block>
+
+        <div class="main-content flex-grow-1">
+            <th:block th:replace="~{fragments/header :: header}"></th:block>
+            
+            <main class="content-area p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold mb-0">평가자 매핑 관리</h2>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Mapping List -->
+                    <div class="col-md-9">
+                        <div class="card p-0 shadow-sm border-0 overflow-hidden">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-4">평가 유형</th>
+                                            <th>피평가자 (대상)</th>
+                                            <th>평가자 (진행)</th>
+                                            <th class="text-end pe-4">매핑 해제</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="m : ${mappings}">
+                                            <td class="ps-4">
+                                                <span class="badge bg-secondary" th:text="${m.evalType}">유형</span>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold" th:text="${m.evaluateeName}">대상자</div>
+                                                <small class="text-muted" th:text="${m.evaluateeDeptName}">소속부서</small>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold text-primary" th:text="${m.evaluatorName}">평가자</div>
+                                                <small class="text-muted" th:text="${m.evaluatorDeptName}">소속부서</small>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <form th:action="@{/admin/evaluators/delete}" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" th:value="${m.id}"/>
+                                                    <button class="btn btn-sm btn-outline-danger shadow-sm"><i class="bi bi-person-x"></i></button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Mapping -->
+                    <div class="col-md-3">
+                        <div class="card p-4 shadow-sm border-0 border-top border-primary border-4">
+                            <h5 class="fw-bold mb-4"><i class="bi bi-link-45deg me-2"></i>권한 부여</h5>
+                            <form th:action="@{/admin/evaluators/add}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted fw-semibold">1. 피평가자 (대상)</label>
+                                    <select name="evaluateeId" class="form-select" required>
+                                        <option value="">대상 선택</option>
+                                        <option th:each="emp : ${employees}" th:value="${emp.id}" th:text="|${emp.name} (${emp.departmentName})|"></option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted fw-semibold">2. 평가자 (주체)</label>
+                                    <select name="evaluatorId" class="form-select" required>
+                                        <option value="">평가자 선택</option>
+                                        <option th:each="emp : ${employees}" th:value="${emp.id}" th:text="|${emp.name} (${emp.departmentName})|"></option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label text-muted fw-semibold">3. 평가 유형</label>
+                                    <select name="evalType" class="form-select" required>
+                                        <option value="PERFORMANCE">성과 평가</option>
+                                        <option value="COMPETENCY">역량 평가</option>
+                                        <option value="PEER">다면 평가</option>
+                                        <option value="INTERVIEW">면담 평가</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 shadow-sm fw-bold">관계 생성</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

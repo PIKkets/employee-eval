@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: employee-eval
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:eval_db;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.evaluation.employee_eval.domain
+  configuration:
+    map-underscore-to-camel-case: true
+
+server:
+  port: 8080

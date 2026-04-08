@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.evaluation.employee_eval.mapper.EmployeeMapper">
+    
+    <select id="findAll" resultType="Employee">
+        SELECT e.*, d.name as departmentName 
+        FROM EMPLOYEE e 
+        LEFT JOIN DEPARTMENT d ON e.department_id = d.id 
+        ORDER BY e.id DESC
+    </select>
+    
+    <select id="findById" resultType="Employee">
+        SELECT * FROM EMPLOYEE WHERE id = #{id}
+    </select>
+    
+    <select id="findByLoginId" resultType="Employee">
+        SELECT e.*, d.name as departmentName 
+        FROM EMPLOYEE e 
+        LEFT JOIN DEPARTMENT d ON e.department_id = d.id 
+        WHERE e.login_id = #{loginId}
+    </select>
+    
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO EMPLOYEE (department_id, login_id, password, name, email, position, is_leader, role) 
+        VALUES (#{departmentId}, #{loginId}, #{password}, #{name}, #{email}, #{position}, #{isLeader}, #{role})
+    </insert>
+
+    <update id="updateGrade">
+        UPDATE EMPLOYEE 
+        SET total_score = #{totalScore}, final_grade = #{finalGrade} 
+        WHERE id = #{id}
+    </update>
+    
+    <update id="update">
+        UPDATE EMPLOYEE 
+        SET department_id = #{departmentId}, name = #{name}, email = #{email}, position = #{position}, is_leader = #{isLeader}, role = #{role}
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete">
+        DELETE FROM EMPLOYEE WHERE id = #{id}
+    </delete>
+
+</mapper>

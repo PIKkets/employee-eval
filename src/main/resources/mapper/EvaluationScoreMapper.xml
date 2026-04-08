@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.evaluation.employee_eval.mapper.EvaluationScoreMapper">
+    
+    <select id="findByMappingId" resultType="EvaluationScore">
+        SELECT s.*, e.name as elementName, e.weight as elementWeight 
+        FROM EVALUATION_SCORE s
+        JOIN EVALUATION_ELEMENT e ON s.element_id = e.id
+        WHERE s.mapping_id = #{mappingId}
+        ORDER BY s.id ASC
+    </select>
+    
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO EVALUATION_SCORE (mapping_id, element_id, score, comment) 
+        VALUES (#{mappingId}, #{elementId}, #{score}, #{comment})
+    </insert>
+    
+    <delete id="deleteByMappingId">
+        DELETE FROM EVALUATION_SCORE WHERE mapping_id = #{mappingId}
+    </delete>
+
+</mapper>

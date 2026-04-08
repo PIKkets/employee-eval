@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.evaluation.employee_eval.mapper.DepartmentMapper">
+    
+    <select id="findAll" resultType="Department">
+        SELECT * FROM DEPARTMENT ORDER BY id ASC
+    </select>
+    
+    <select id="findById" resultType="Department">
+        SELECT * FROM DEPARTMENT WHERE id = #{id}
+    </select>
+    
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO DEPARTMENT (name) VALUES (#{name})
+    </insert>
+    
+    <update id="update">
+        UPDATE DEPARTMENT SET name = #{name} WHERE id = #{id}
+    </update>
+    
+    <delete id="delete">
+        DELETE FROM DEPARTMENT WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <aside th:fragment="sidebar" class="sidebar bg-white shadow-sm vh-100 d-flex flex-column py-4 px-3" style="width: 260px; position: sticky; top: 0;">
+        <div class="brand d-flex align-items-center gap-2 mb-5 px-2 text-primary">
+            <i class="bi bi-bullseye fs-3"></i>
+            <span class="fs-4 fw-bold">E-Eval</span>
+        </div>
+        
+        <ul class="nav flex-column gap-2 mb-auto">
+            <li class="nav-item">
+                <a href="/" class="nav-link text-dark fw-medium rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                    <i class="bi bi-grid-1x2-fill"></i> 대시보드
+                </a>
+            </li>
+            
+            <th:block th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">
+                    <span>관리자 메뉴</span>
+                </h6>
+                <li class="nav-item">
+                    <a href="/admin/departments" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                        <i class="bi bi-diagram-3"></i> 부서 관리
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/employees" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                        <i class="bi bi-people"></i> 사원 관리
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/elements" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                        <i class="bi bi-list-check"></i> 평가요소 관리
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/evaluators" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                        <i class="bi bi-person-lines-fill"></i> 평가자 생성
+                    </a>
+                </li>
+                <li class="nav-item mt-2">
+                    <a href="/admin/grades" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                        <i class="bi bi-award"></i> 최종 등급 확정
+                    </a>
+                </li>
+            </th:block>
+
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">
+                <span>평가 메뉴</span>
+            </h6>
+            <li class="nav-item">
+                <a href="/evaluation/performance" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                    <i class="bi bi-graph-up-arrow"></i> 성과 평가
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/evaluation/competency" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                    <i class="bi bi-star"></i> 역량 평가
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/evaluation/peer" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                    <i class="bi bi-people-fill"></i> 다면 평가
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/evaluation/interview" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                    <i class="bi bi-chat-dots"></i> 면담 평가
+                </a>
+            </li>
+        </ul>
+        
+        <div class="mt-auto px-3 text-center text-muted" style="font-size: 0.8rem;">
+            &copy; 2026 E-Eval Corp.
+        </div>
+    </aside>
+</body>
+</html>

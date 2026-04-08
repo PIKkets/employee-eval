@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{layout/base :: head('최종 등급 확정 - 사원 평가 시스템')}"></th:block>
+</head>
+<body class="bg-light">
+    
+    <div class="d-flex wrapper">
+        <th:block th:replace="~{fragments/sidebar :: sidebar}"></th:block>
+
+        <div class="main-content flex-grow-1">
+            <th:block th:replace="~{fragments/header :: header}"></th:block>
+            
+            <main class="content-area p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold mb-0">최종 등급 확정</h2>
+                    <form th:action="@{/admin/grades/calculate}" method="post">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                            <i class="bi bi-calculator me-2"></i>최종 등급 일괄 산출하기
+                        </button>
+                    </form>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                    <strong>성공!</strong> 전사 사원 최종 평가 점수 산출 및 등급 확정이 완료되었습니다.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="card p-0 shadow-sm border-0 bg-white">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">사원명</th>
+                                    <th>소속 부서</th>
+                                    <th>총합산 점수</th>
+                                    <th class="pe-4 text-center">최종 등급</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="emp : ${employees}">
+                                    <td class="ps-4 fw-bold text-dark" th:text="${emp.name}">홍길동</td>
+                                    <td><span class="badge bg-secondary" th:text="${emp.departmentName}">운영팀</span></td>
+                                    <td>
+                                        <span class="fw-semibold text-primary" th:if="${emp.totalScore != null}" th:text="${emp.totalScore} + ' 점'">88.5 점</span>
+                                        <span class="text-muted" th:if="${emp.totalScore == null}">미산출</span>
+                                    </td>
+                                    <td class="pe-4 text-center">
+                                        <span class="badge rounded-pill fs-6" 
+                                              th:classappend="${emp.finalGrade == 'S' ? 'bg-success' : (emp.finalGrade == 'A' ? 'bg-primary' : (emp.finalGrade == 'B' ? 'bg-info' : (emp.finalGrade == 'C' ? 'bg-warning' : (emp.finalGrade == 'D' ? 'bg-danger' : 'bg-light text-dark'))))}"
+                                              th:text="${emp.finalGrade != null ? emp.finalGrade : '-'}">
+                                            A
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

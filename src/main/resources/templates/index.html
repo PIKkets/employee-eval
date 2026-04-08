@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{layout/base :: head('사원 평가 시스템 - 대시보드')}"></th:block>
+</head>
+<body class="bg-light">
+    
+    <div class="d-flex wrapper">
+        <!-- Sidebar -->
+        <th:block th:replace="~{fragments/sidebar :: sidebar}"></th:block>
+
+        <div class="main-content flex-grow-1">
+            <!-- Header -->
+            <th:block th:replace="~{fragments/header :: header}"></th:block>
+            
+            <!-- Main Content Area -->
+            <main class="content-area p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold mb-0">총괄 대시보드 <span class="badge bg-primary ms-2 fs-6">Live</span></h2>
+                    <!-- Dashboard Admin Tools -->
+                </div>
+
+                <!-- System Overview Cards -->
+                <div class="row g-4 mt-2">
+                    <div class="col-md-3">
+                        <div class="card stat-card shadow-sm border-0 bg-primary text-white p-4 h-100">
+                            <h6 class="text-white-50 fw-bold text-uppercase mb-2">전체 평가 대상</h6>
+                            <h2 class="display-5 fw-bold mb-0" th:text="${totalCount} + '명'">14명</h2>
+                            <i class="bi bi-people position-absolute text-white-50" style="font-size: 4rem; right: 20px; top: 15px; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card shadow-sm border-0 bg-success text-white p-4 h-100">
+                            <h6 class="text-white-50 fw-bold text-uppercase mb-2">평가 완료</h6>
+                            <h2 class="display-5 fw-bold mb-0" th:text="${evaluatedCount} + '명'">0명</h2>
+                            <i class="bi bi-check-circle position-absolute text-white-50" style="font-size: 4rem; right: 20px; top: 15px; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card shadow-sm border-0 bg-info text-white p-4 h-100">
+                            <h6 class="text-white-50 fw-bold text-uppercase mb-2">진행률</h6>
+                            <h2 class="display-5 fw-bold mb-0" th:text="${totalCount > 0 ? (evaluatedCount * 100 / totalCount) : 0} + '%'">0%</h2>
+                            <i class="bi bi-pie-chart position-absolute text-white-50" style="font-size: 4rem; right: 20px; top: 15px; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card shadow-sm border-0 bg-warning text-dark p-4 h-100">
+                            <h6 class="text-dark fw-bold text-uppercase mb-2">미완료 사원</h6>
+                            <h2 class="display-5 fw-bold mb-0" th:text="${totalCount - evaluatedCount} + '명'">14명</h2>
+                            <i class="bi bi-hourglass-split position-absolute text-dark" style="font-size: 4rem; right: 20px; top: 15px; opacity: 0.2;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mt-2">
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm border-0 h-100 p-4">
+                            <h5 class="fw-bold mb-4">전사 등급 분포</h5>
+                            <div th:if="${gradeDist != null and not #maps.isEmpty(gradeDist)}">
+                                <canvas id="gradeChart" height="250"></canvas>
+                            </div>
+                            <div th:unless="${gradeDist != null and not #maps.isEmpty(gradeDist)}" class="text-center py-5 text-muted">
+                                확정된 평가가 없습니다.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm border-0 h-100 p-4">
+                            <h5 class="fw-bold mb-4">부서별 평균 점수</h5>
+                            <div th:if="${deptAverages != null and not #maps.isEmpty(deptAverages)}">
+                                <canvas id="deptChart" height="120"></canvas>
+                            </div>
+                            <div th:unless="${deptAverages != null and not #maps.isEmpty(deptAverages)}" class="text-center py-5 text-muted">
+                                확정된 평가가 없습니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card shadow-sm border-0 p-4">
+                            <h5 class="fw-bold mb-4"><i class="bi bi-star-fill text-warning me-2"></i>핵심 인재 TOP 랭킹 (최종점수순)</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>순위</th>
+                                            <th>이름</th>
+                                            <th>부서</th>
+                                            <th>점수</th>
+                                            <th>등급</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="emp, stat : ${topTalents}" th:classappend="${stat.index < 3 ? 'bg-light' : ''}">
+                                            <td>
+                                                <span class="badge rounded-pill" th:classappend="${stat.index == 0 ? 'bg-warning text-dark' : (stat.index == 1 ? 'bg-secondary' : (stat.index == 2 ? 'bg-dark' : 'bg-light text-dark border'))}" th:text="${stat.index + 1} + '위'">1위</span>
+                                            </td>
+                                            <td class="fw-bold" th:text="${emp.name}">홍길동</td>
+                                            <td th:text="${emp.departmentName}">기획팀</td>
+                                            <td class="fw-bold text-primary" th:text="${emp.totalScore} + ' 점'">95 점</td>
+                                            <td><span class="badge bg-primary" th:text="${emp.finalGrade}">S</span></td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(topTalents)}">
+                                            <td colspan="5" class="text-center py-4 text-muted">아직 확정된 평가 결과가 없습니다.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    const gradeDist = /*[[${gradeDist}]]*/ {};
+                    const deptAverages = /*[[${deptAverages}]]*/ {};
+
+                    // Grade Chart
+                    const gradeCtx = document.getElementById('gradeChart');
+                    if(gradeCtx && Object.keys(gradeDist).length > 0) {
+                        new Chart(gradeCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: Object.keys(gradeDist),
+                                datasets: [{
+                                    data: Object.values(gradeDist),
+                                    backgroundColor: ['#20c997', '#0d6efd', '#0dcaf0', '#ffc107', '#dc3545'],
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: { cutout: '70%', responsive: true, plugins: { legend: { position: 'bottom' } } }
+                        });
+                    }
+
+                    // Dept Chart
+                    const deptCtx = document.getElementById('deptChart');
+                    if(deptCtx && Object.keys(deptAverages).length > 0) {
+                        new Chart(deptCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: Object.keys(deptAverages),
+                                datasets: [{
+                                    label: '평균 점수',
+                                    data: Object.values(deptAverages),
+                                    backgroundColor: '#0d6efd',
+                                    borderRadius: 6
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: { y: { beginAtZero: true, max: 100 } }
+                            }
+                        });
+                    }
+                    /*]]>*/
+                </script>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{layout/base :: head('평가 입력 - 사원 평가 시스템')}"></th:block>
+</head>
+<body class="bg-light">
+    
+    <div class="d-flex wrapper">
+        <th:block th:replace="~{fragments/sidebar :: sidebar}"></th:block>
+
+        <div class="main-content flex-grow-1">
+            <th:block th:replace="~{fragments/header :: header}"></th:block>
+            
+            <main class="content-area p-4">
+                <div class="d-flex justify-content-between align-items-center mb-0">
+                    <h2 class="fw-bold mb-0">평가 입력 <span class="badge bg-primary fs-6 ms-2" th:text="${mapping.evaluateeName}">사원명</span></h2>
+                    <a th:href="@{/evaluation/{type}(type=${evalTypeLower})}" class="btn btn-outline-secondary rounded-pill px-4"><i class="bi bi-arrow-left"></i> 목록으로 돌아가기</a>
+                </div>
+
+                <div class="alert alert-primary border-0 shadow-sm rounded-4 mt-4 mb-4 d-flex align-items-center" th:if="${evalTypeLower == 'performance'}">
+                    <i class="bi bi-bar-chart-fill fs-3 me-3"></i>
+                    <div>
+                        <strong class="d-block">성과 평가 주요 포인트</strong>
+                        <span th:if="${isSelf}">✏️ <strong>자가평가 단계</strong> — 이번 분기 목표(KPI/OKR) 대비 실제 달성 결과를 수치 중심으로 작성해주세요.</span>
+                        <span th:unless="${isSelf}">⭐ <strong>팀장 최종 평가</strong> — 팀원의 실적 서술을 검토하고 목표 달성도 중심으로 최종 점수를 매겨주세요.</span>
+                    </div>
+                </div>
+                <div class="alert alert-warning border-0 shadow-sm rounded-4 mt-4 mb-4 d-flex align-items-center" th:if="${evalTypeLower == 'competency'}">
+                    <i class="bi bi-person-badge-fill fs-3 me-3"></i>
+                    <div>
+                        <strong class="d-block">역량 평가 주요 포인트</strong>
+                        <span th:if="${isSelf}">✏️ <strong>자가평가 단계</strong> — "나는 이번 분기 기술적으로 얼마나 성장했나?" 결과보다 과정·능력치를 솔직하게 서술해주세요.</span>
+                        <span th:unless="${isSelf}">⭐ <strong>팀장 최종 평가</strong> — 팀원의 역량 서술을 바탕으로 전문성·책임감·협업 능력치를 최종 점수로 평가해주세요.</span>
+                    </div>
+                </div>
+                <div class="alert alert-info border-0 shadow-sm rounded-4 mt-4 mb-4 d-flex align-items-center" th:if="${evalTypeLower == 'peer'}">
+                    <i class="bi bi-people-fill fs-3 me-3"></i>
+                    <div><strong class="d-block">다면 평가 주요 포인트</strong>"너랑 또 일하고 싶어?" (옆자리 동료 및 타 부서원 중심의 평가입니다)</div>
+                </div>
+                <div class="alert alert-success border-0 shadow-sm rounded-4 mt-4 mb-4 d-flex align-items-center" th:if="${evalTypeLower == 'interview'}">
+                    <i class="bi bi-person-lines-fill fs-3 me-3"></i>
+                    <div><strong class="d-block">면담 평가 주요 포인트</strong>"내년엔 이거 더 잘해보자" (나와 팀장님의 1:1 대화 중심의 평가입니다)</div>
+                </div>
+
+                <!-- 자가 평가 대기중 잠금 화면 -->
+                <div th:if="${isLocked}" class="card shadow-sm border-0 border-top border-4 border-warning mt-4 p-5 text-center">
+                    <i class="bi bi-clock-history text-warning" style="font-size: 4rem;"></i>
+                    <h4 class="fw-bold mt-4">자가 평가 제출 대기 중</h4>
+                    <p class="text-muted mt-2">대상자가 본인의 성과 작성을 완료해야 팀장 최종 평가를 진행할 수 있습니다.<br>작성이 지연될 경우 알림을 전송해 주세요.</p>
+                    <div class="mt-4">
+                        <button class="btn btn-warning px-4 rounded-pill fw-bold" onclick="alert('대상자에게 작성 요청 알림을 발송했습니다!');"><i class="bi bi-bell-fill me-2"></i>작성 요청 알림 보내기</button>
+                    </div>
+                </div>
+
+                <!-- 평가 입력 폼 (Locked가 아닐 때만 표시) -->
+                <form th:unless="${isLocked}" th:action="@{/evaluation/submit}" method="post" th:object="${formDto}" class="mt-4">
+                    <input type="hidden" th:field="*{mappingId}" />
+                    <input type="hidden" name="evalTypeLower" th:value="${evalTypeLower}" />
+                    
+                    <div class="row g-4">
+                        <div class="col-12" th:each="score, stat : *{scores}">
+                            <div class="card shadow-sm border-0 h-100 border-start border-4 border-primary p-4 hover-lift">
+                                <input type="hidden" th:field="*{scores[__${stat.index}__].elementId}" />
+                                
+                                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-check2-square text-primary me-2"></i><span th:text="${score.elementName}">목표 달성도</span></h5>
+                                    <span class="badge bg-light text-dark border"><i class="bi bi-diagram-2 me-1"></i>가중치 <span th:text="${score.elementWeight}">40</span>%</span>
+                                </div>
+                                
+                                <div class="row">
+                                    <!-- 본인 자가평가일 때 점수 숨김 / 코멘트 라벨 변경 -->
+                                    <div class="col-12" th:if="${isSelf}">
+                                        <input type="hidden" th:field="*{scores[__${stat.index}__].score}" value="0">
+                                        <label class="form-label text-primary fw-bold"><i class="bi bi-pencil-fill me-1"></i>본인 성과 분석 서술 (필수 기입)</label>
+                                        <textarea th:field="*{scores[__${stat.index}__].comment}" class="form-control bg-light" rows="4" placeholder="해당 항목에 대한 구체적인 수치나 실적 사례를 작성해주세요." required></textarea>
+                                    </div>
+                                    
+                                    <!-- 팀장 모드일 때 -->
+                                    <th:block th:unless="${isSelf}">
+                                        <!-- 팀원의 자가평가 내역이 있으면 표시 -->
+                                        <div class="col-12 mb-3" th:if="${score.selfComment != null}">
+                                            <label class="form-label text-primary fw-bold"><i class="bi bi-person-check-fill me-1"></i>대상자의 자가 평가 (제출된 실적 기록)</label>
+                                            <div class="p-3 bg-light rounded-3 border text-dark" style="white-space: pre-wrap;" th:text="${score.selfComment}">자가평가 내용</div>
+                                        </div>
+                                        
+                                        <div class="col-md-3">
+                                            <label class="form-label text-muted fw-semibold">최종 평가 점수 (0~100점)</label>
+                                            <input type="number" th:field="*{scores[__${stat.index}__].score}" class="form-control form-control-lg fw-bold text-center text-primary" min="0" max="100" required placeholder="0">
+                                        </div>
+                                        <div class="col-md-9">
+                                            <label class="form-label text-muted fw-semibold">최종 코멘트 (평가 사유 및 피드백)</label>
+                                            <textarea th:field="*{scores[__${stat.index}__].comment}" class="form-control" rows="3" placeholder="제출된 실적을 바탕으로 구체적인 피드백을 작성해주세요."></textarea>
+                                        </div>
+                                    </th:block>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 mt-4 shadow-sm border-0 bg-white text-end">
+                        <div>
+                            <button type="submit" class="btn btn-lg rounded-pill px-5 shadow-sm fw-bold" th:classappend="${isSelf} ? 'btn-success' : 'btn-primary'">
+                                <i class="bi" th:classappend="${isSelf} ? 'bi-check-circle me-2' : 'bi-save me-2'"></i>
+                                <span th:text="${isSelf} ? '자가 평가 제출하기' : '최종 평가 제출'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </main>
+        </div>
+    </div>
+
+    <th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>
+
