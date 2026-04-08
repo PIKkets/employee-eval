@@ -1,0 +1,6 @@
+- [x] Verify GitHub Login in AI Browser
+- [x] Create GitHub Repository (`employee-eval`, Private)
+- [x] Register SSH Key on GitHub
+- [x] Add Remote to Local Git Repository
+- [x] Push Code to GitHub
+- [x] Verify Repository Contents
