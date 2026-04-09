@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{layout/base :: head(${pageTitle} + ' 대상 목록 - 사원 평가 시스템')}"></th:block>
@@ -27,6 +27,24 @@
                 <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
                     <strong>성공!</strong> 평가가 성공적으로 저장되었습니다.
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div th:if="${param.success_add}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                    <strong>추가 완료!</strong> 다면 평가 대상이 성공적으로 추가되었습니다.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Add Peer Evaluation Card -->
+                <div th:if="${evalType == 'PEER'}" class="card p-4 shadow-sm border-0 bg-white mb-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-person-plus-fill text-primary"></i> 다면 평가 대상 추가</h5>
+                    <p class="text-muted mb-3">함께 일했던 동료, 타 부서 협업자, 혹은 상향 평가를 위해 팀장님을 선택하여 평가를 진행할 수 있습니다. (평가는 익명으로 기록됩니다.)</p>
+                    <form th:action="@{/evaluation/peer/add}" method="post" class="d-flex gap-3 align-items-center">
+                        <select name="evaluateeId" class="form-select flex-grow-1" required>
+                            <option value="">평가할 대상을 선택하세요</option>
+                            <option th:each="emp : ${peerCandidates}" th:value="${emp.id}" th:text="|${emp.name} (${emp.departmentName != null ? emp.departmentName : '소속 미지정'} - ${emp.position})|"></option>
+                        </select>
+                        <button type="submit" class="btn btn-primary px-4 shadow-sm"><i class="bi bi-plus-lg"></i> 대상 추가</button>
+                    </form>
                 </div>
 
                 <div class="card p-0 shadow-sm border-0 bg-white">

@@ -3,12 +3,12 @@ spring:
     name: employee-eval
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:eval_db;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:file:./data/eval_db;AUTO_SERVER=TRUE
     username: sa
     password:
   sql:
     init:
-      mode: always
+      mode: never
   thymeleaf:
     cache: false
     prefix: classpath:/templates/

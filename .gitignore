@@ -35,5 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
-cookies.txt
+### Configuration & Secrets ###
 gradle.properties
+
+### Custom App Data ###
+data/
+cookies.txt

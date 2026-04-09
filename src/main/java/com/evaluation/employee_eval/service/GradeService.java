@@ -28,11 +28,12 @@ public class GradeService {
 
         for (Employee emp : allEmployees) {
             // Skip ADMINs from getting grades
-            if ("ADMIN".equals(emp.getRole())) continue;
+            if ("ADMIN".equals(emp.getRole()))
+                continue;
 
             List<EvaluatorMapping> myEvaluations = allMappings.stream()
-                .filter(m -> m.getEvaluateeId().equals(emp.getId()))
-                .collect(Collectors.toList());
+                    .filter(m -> m.getEvaluateeId().equals(emp.getId()))
+                    .collect(Collectors.toList());
 
             double totalScore = calculateTotalScore(myEvaluations);
             String finalGrade = getGradeFromScore(totalScore);
@@ -44,31 +45,64 @@ public class GradeService {
     }
 
     private double calculateTotalScore(List<EvaluatorMapping> mappings) {
-        double perfTotal = 0; int perfCount = 0;
-        double compTotal = 0; int compCount = 0;
-        double peerTotal = 0; int peerCount = 0;
-        double interviewTotal = 0; int interviewCount = 0;
+        double perfTotal = 0;
+        int perfCount = 0;
+        double compTotal = 0;
+        int compCount = 0;
+        double peerTotal = 0;
+        int peerCount = 0;
+        double interviewTotal = 0;
+        int interviewCount = 0;
 
         for (EvaluatorMapping mapping : mappings) {
+            // 자가 평가는 최종 점수 합산 로직에서 완전 배제 (리더/비교 평가만 반영)
+            if (mapping.getEvaluateeId().equals(mapping.getEvaluatorId())) {
+                continue;
+            }
+
             List<EvaluationScore> scores = scoreMapper.findByMappingId(mapping.getId());
             double currentEvalScore = calculateEvalScore(scores);
-            
+
             switch (mapping.getEvalType()) {
-                case "PERFORMANCE": perfTotal += currentEvalScore; perfCount++; break;
-                case "COMPETENCY": compTotal += currentEvalScore; compCount++; break;
-                case "PEER": peerTotal += currentEvalScore; peerCount++; break;
-                case "INTERVIEW": interviewTotal += currentEvalScore; interviewCount++; break;
+                case "PERFORMANCE":
+                    perfTotal += currentEvalScore;
+                    perfCount++;
+                    break;
+                case "COMPETENCY":
+                    compTotal += currentEvalScore;
+                    compCount++;
+                    break;
+                case "PEER":
+                    peerTotal += currentEvalScore;
+                    peerCount++;
+                    break;
+                case "INTERVIEW":
+                    interviewTotal += currentEvalScore;
+                    interviewCount++;
+                    break;
             }
         }
 
         double finalScore = 0.0;
         double totalWeight = 0;
 
-        if (perfCount > 0) { finalScore += (perfTotal / perfCount) * 0.40; totalWeight += 0.40; }
-        if (compCount > 0) { finalScore += (compTotal / compCount) * 0.30; totalWeight += 0.30; }
-        if (peerCount > 0) { finalScore += (peerTotal / peerCount) * 0.15; totalWeight += 0.15; }
-        if (interviewCount > 0) { finalScore += (interviewTotal / interviewCount) * 0.15; totalWeight += 0.15; }
-        
+        if (perfCount > 0) {
+            finalScore += (perfTotal / perfCount) * 0.40;
+            totalWeight += 0.40;
+        }
+        if (compCount > 0) {
+            finalScore += (compTotal / compCount) * 0.30;
+            totalWeight += 0.30;
+        }
+        if (peerCount > 0) {
+            finalScore += (peerTotal / peerCount) * 0.15;
+            totalWeight += 0.15;
+        }
+        if (interviewCount > 0) {
+            finalScore += (interviewTotal / interviewCount) * 0.15;
+            totalWeight += 0.15;
+        }
+
         if (totalWeight > 0) {
             finalScore = finalScore / totalWeight;
         }
@@ -77,7 +111,8 @@ public class GradeService {
     }
 
     private double calculateEvalScore(List<EvaluationScore> scores) {
-        if (scores == null || scores.isEmpty()) return 0;
+        if (scores == null || scores.isEmpty())
+            return 0;
         double sum = 0;
         for (EvaluationScore score : scores) {
             sum += score.getScore() * (score.getElementWeight() / 100.0);
@@ -86,11 +121,16 @@ public class GradeService {
     }
 
     private String getGradeFromScore(double score) {
-        if (score == 0) return "-";
-        if (score >= 95) return "S";
-        if (score >= 85) return "A";
-        if (score >= 75) return "B";
-        if (score >= 60) return "C";
+        if (score == 0)
+            return "-";
+        if (score >= 95)
+            return "S";
+        if (score >= 85)
+            return "A";
+        if (score >= 75)
+            return "B";
+        if (score >= 60)
+            return "C";
         return "D";
     }
 }

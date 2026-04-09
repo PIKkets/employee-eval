@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{layout/base :: head('평가 입력 - 사원 평가 시스템')}"></th:block>
@@ -39,7 +39,67 @@
                 </div>
                 <div class="alert alert-success border-0 shadow-sm rounded-4 mt-4 mb-4 d-flex align-items-center" th:if="${evalTypeLower == 'interview'}">
                     <i class="bi bi-person-lines-fill fs-3 me-3"></i>
-                    <div><strong class="d-block">면담 평가 주요 포인트</strong>"내년엔 이거 더 잘해보자" (나와 팀장님의 1:1 대화 중심의 평가입니다)</div>
+                    <div><strong class="d-block">면담 평가 주요 포인트</strong>"내년엔 이거 더 잘해보자" (종합 데이터 기반 성장 방향성 논의)</div>
+                </div>
+
+                <!-- 면담 전 참고 자료 (성과, 역량, 다면 평가 요약) -->
+                <div th:if="${evalTypeLower == 'interview' and historyData != null and not #maps.isEmpty(historyData)}" class="card shadow-sm border-0 border-top border-4 border-success mt-4 mb-4 p-4 text-dark bg-white">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-journal-text text-success me-2"></i>종합 평가 결과 브리핑 (이전 단계 데이터 종합)</h5>
+                    <p class="text-muted small mb-4">본 데이터는 면담 전 대상자의 성과, 역량, 다면 평가 결과를 바탕으로 조율을 돕기 위해 제공됩니다.</p>
+                    
+                    <div class="row g-4">
+                        <!-- 성과 평가 내역 -->
+                        <div class="col-md-4">
+                            <div class="card bg-light border-0 h-100 p-3 shadow-none">
+                                <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-bar-chart-fill me-2"></i>성과 평가</h6>
+                                <div th:if="${historyData['PERFORMANCE'] != null}">
+                                    <div th:each="score : ${historyData['PERFORMANCE']}" class="mb-3 border-bottom pb-2">
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <span th:text="${score.elementName}" class="fw-semibold"></span>
+                                            <strong th:text="${score.score != null ? score.score + '점' : '미평가'}" class="text-primary"></strong>
+                                        </div>
+                                        <div class="small text-muted text-truncate" th:text="${score.comment}" title="코멘트"></div>
+                                    </div>
+                                </div>
+                                <div th:unless="${historyData['PERFORMANCE'] != null}" class="text-muted small">데이터 없음</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 역량 평가 내역 -->
+                        <div class="col-md-4">
+                            <div class="card bg-light border-0 h-100 p-3 shadow-none">
+                                <h6 class="fw-bold mb-3 text-warning"><i class="bi bi-person-badge-fill me-2"></i>역량 평가</h6>
+                                <div th:if="${historyData['COMPETENCY'] != null}">
+                                    <div th:each="score : ${historyData['COMPETENCY']}" class="mb-3 border-bottom pb-2">
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <span th:text="${score.elementName}" class="fw-semibold"></span>
+                                            <strong th:text="${score.score != null ? score.score + '점' : '미평가'}" class="text-warning"></strong>
+                                        </div>
+                                        <div class="small text-muted text-truncate" th:text="${score.comment}" title="코멘트"></div>
+                                    </div>
+                                </div>
+                                <div th:unless="${historyData['COMPETENCY'] != null}" class="text-muted small">데이터 없음</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 다면 평가 내역 -->
+                        <div class="col-md-4">
+                            <div class="card bg-light border-0 h-100 p-3 shadow-none">
+                                <h6 class="fw-bold mb-3 text-info"><i class="bi bi-people-fill me-2"></i>다면 평가 (평균 요약)</h6>
+                                <div th:if="${historyData['PEER'] != null}">
+                                    <div th:each="score : ${historyData['PEER']}" class="mb-3 border-bottom pb-2">
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <span th:text="${score.elementName}" class="fw-semibold"></span>
+                                            <!-- Дам 평가 점수는 여러 개일 수 있으나 일단 나열됨 -->
+                                            <strong th:text="${score.score != null ? score.score + '점' : '미평가'}" class="text-info"></strong>
+                                        </div>
+                                        <div class="small text-muted text-truncate" th:text="${score.comment}" title="코멘트"></div>
+                                    </div>
+                                </div>
+                                <div th:unless="${historyData['PEER'] != null}" class="text-muted small">데이터 없음</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 자가 평가 대기중 잠금 화면 -->

@@ -24,20 +24,12 @@ public class EvaluationController {
                                  @AuthenticationPrincipal CustomUserDetails user, 
                                  Model model) {
         String type = evalType.toUpperCase();
-        List<EvaluatorMapping> tasks = evaluationService.getMyTasks(user.getEmployee().getId(), type);
         
-        // For 2-step evaluations: populate selfEvalStatus for manager tasks
-        boolean isTwoStepList = "PERFORMANCE".equals(type) || "COMPETENCY".equals(type);
-        if (isTwoStepList) {
-            tasks.forEach(task -> {
-                boolean isSelf = task.getEvaluateeId().equals(task.getEvaluatorId());
-                if (!isSelf) {
-                    // Manager task: check if evaluatee has submitted self-evaluation
-                    List<EvaluationScore> selfScores = evaluationService.getSelfExistingScores(task.getEvaluateeId(), type);
-                    task.setSelfEvalStatus((selfScores != null && !selfScores.isEmpty()) ? "DONE" : "PENDING");
-                }
-            });
+        if ("INTERVIEW".equals(type)) {
+            evaluationService.generateInterviewMappings(user.getEmployee());
         }
+        
+        List<EvaluatorMapping> tasks = evaluationService.getMyTasksWithStatus(user.getEmployee().getId(), type);
         
         model.addAttribute("tasks", tasks);
         model.addAttribute("evalType", type);
@@ -47,7 +39,11 @@ public class EvaluationController {
         switch(type) {
             case "PERFORMANCE": title = "성과 평가"; break;
             case "COMPETENCY": title = "역량 평가"; break;
-            case "PEER": title = "다면 평가"; break;
+            case "PEER": 
+                title = "다면 평가"; 
+                // Pass candidates for assigning peers
+                model.addAttribute("peerCandidates", evaluationService.getAllEmployeesExcept(user.getEmployee().getId()));
+                break;
             case "INTERVIEW": title = "면담 평가"; break;
             default: title = "평가 대상";
         }
@@ -56,75 +52,34 @@ public class EvaluationController {
         return "evaluation/list";
     }
 
+    @PostMapping("/peer/add")
+    public String addPeerEvaluation(@RequestParam Long evaluateeId, @AuthenticationPrincipal CustomUserDetails user) {
+        evaluationService.addPeerMapping(user.getEmployee().getId(), evaluateeId);
+        return "redirect:/evaluation/peer?success_add=true";
+    }
+
     @GetMapping("/{evalType}/{mappingId}")
     public String evaluationForm(@PathVariable String evalType, 
                                  @PathVariable Long mappingId, 
                                  @AuthenticationPrincipal CustomUserDetails user, 
                                  Model model) {
-        EvaluatorMapping mapping = evaluationService.getMapping(mappingId);
-        if(mapping == null || !mapping.getEvaluatorId().equals(user.getEmployee().getId())) {
+        EvaluationFormData formData = evaluationService.getEvaluationFormData(mappingId, evalType, user.getEmployee().getId());
+        
+        if (formData == null) {
             return "redirect:/";
         }
 
-        List<EvaluationElement> elements = evaluationService.getElementsByType(evalType.toUpperCase());
-        List<EvaluationScore> existingScores = evaluationService.getExistingScores(mappingId);
+        model.addAttribute("mapping", formData.getMapping());
+        model.addAttribute("formDto", formData.getFormDto());
+        model.addAttribute("evalTypeLower", formData.getEvalTypeLower());
+        model.addAttribute("isSelf", formData.isSelf());
+        model.addAttribute("isLocked", formData.isLocked());
+        model.addAttribute("historyData", formData.getHistoryData());
         
-        boolean isSelf = mapping.getEvaluatorId().equals(mapping.getEvaluateeId());
-        boolean isManager = !isSelf;
-        boolean isLocked = false;
-        
-        boolean isTwoStep = "PERFORMANCE".equalsIgnoreCase(evalType) || "COMPETENCY".equalsIgnoreCase(evalType);
-        
-        if (isTwoStep && isManager) {
-            List<EvaluationScore> selfScores = evaluationService.getSelfExistingScores(mapping.getEvaluateeId(), evalType.toUpperCase());
-            if (selfScores == null || selfScores.isEmpty()) {
-                isLocked = true;
-            } else {
-                model.addAttribute("selfScores", selfScores);
-            }
-        }
-        
-        EvaluationFormDto formDto = new EvaluationFormDto();
-        formDto.setMappingId(mappingId);
-        List<EvaluationScore> scores = new ArrayList<>();
-        
-        for (EvaluationElement element : elements) {
-            EvaluationScore score = new EvaluationScore();
-            score.setElementId(element.getId());
-            score.setElementName(element.getName());
-            score.setElementWeight(element.getWeight());
-            
-            existingScores.stream()
-                .filter(s -> s.getElementId().equals(element.getId()))
-                .findFirst()
-                .ifPresent(s -> {
-                    score.setScore(s.getScore());
-                    score.setComment(s.getComment());
-                });
-            
-            if (score.getScore() == null) {
-                score.setScore(isSelf ? 0 : null);
-            }
-                
-            if (isManager && isTwoStep && !isLocked) {
-                List<EvaluationScore> selfScores = (List<EvaluationScore>) model.getAttribute("selfScores");
-                if (selfScores != null) {
-                    selfScores.stream()
-                        .filter(s -> s.getElementId().equals(element.getId()))
-                        .findFirst()
-                        .ifPresent(s -> score.setSelfComment(s.getComment()));
-                }
-            }
-                
-            scores.add(score);
-        }
-        formDto.setScores(scores);
-        
-        model.addAttribute("mapping", mapping);
-        model.addAttribute("formDto", formDto);
-        model.addAttribute("evalTypeLower", evalType);
-        model.addAttribute("isSelf", isSelf);
-        model.addAttribute("isLocked", isLocked);
+        // We might also need selfScores in the view if they are used to display explicitly
+        // Since we embedded the self comments into the formDto scores, we might not strictly need the raw selfScores list in the view,
+        // but if the view depends on it:
+        // (Assuming the view only uses the `score.selfComment` inside the loop)
         
         return "evaluation/form";
     }
