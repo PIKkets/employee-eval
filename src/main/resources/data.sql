@@ -5,42 +5,42 @@ INSERT INTO DEPARTMENT (name) VALUES ('기획팀'), ('개발1팀'), ('개발2팀
 
 -- Employees
 INSERT INTO EMPLOYEE (department_id, login_id, password, name, email, position, is_leader, role) VALUES 
-(5, 'admin', '{noop}1234', '관리자', 'admin@eval.com', '총괄', FALSE, 'ADMIN'),
+(5, 'admin', '{noop}1234', '관리자', 'admin@eval.com', '총괄', 0, 'ADMIN'),
 -- 기획팀 (dept 1): emp001 리더
-(1, 'emp001', '{noop}1234', '박지훈', 'jihoon.park@eval.com', '팀장', TRUE, 'USER'),
-(1, 'emp002', '{noop}1234', '김민지', 'minji.kim@eval.com', '과장', FALSE, 'USER'),
-(1, 'emp003', '{noop}1234', '최영수', 'youngsoo.choi@eval.com', '사원', FALSE, 'USER'),
+(1, 'emp001', '{noop}1234', '박지훈', 'jihoon.park@eval.com', '팀장', 1, 'USER'),
+(1, 'emp002', '{noop}1234', '김민지', 'minji.kim@eval.com', '과장', 0, 'USER'),
+(1, 'emp003', '{noop}1234', '최영수', 'youngsoo.choi@eval.com', '사원', 0, 'USER'),
 -- 개발1팀 (dept 2): emp004 리더
-(2, 'emp004', '{noop}1234', '정재윤', 'jaeyoon.jeong@eval.com', '팀장', TRUE, 'USER'),
-(2, 'emp005', '{noop}1234', '이수진', 'sujin.lee@eval.com', '과장', FALSE, 'USER'),
-(2, 'emp006', '{noop}1234', '박태현', 'taehyun.park@eval.com', '대리', FALSE, 'USER'),
+(2, 'emp004', '{noop}1234', '정재윤', 'jaeyoon.jeong@eval.com', '팀장', 1, 'USER'),
+(2, 'emp005', '{noop}1234', '이수진', 'sujin.lee@eval.com', '과장', 0, 'USER'),
+(2, 'emp006', '{noop}1234', '박태현', 'taehyun.park@eval.com', '대리', 0, 'USER'),
 -- 개발2팀 (dept 3): emp007 리더
-(3, 'emp007', '{noop}1234', '김철수', 'chulsoo.kim@eval.com', '팀장', TRUE, 'USER'),
-(3, 'emp008', '{noop}1234', '이영희', 'younghee.lee@eval.com', '대리', FALSE, 'USER'),
-(3, 'emp009', '{noop}1234', '윤도현', 'dohyun.yoon@eval.com', '사원', FALSE, 'USER'),
+(3, 'emp007', '{noop}1234', '김철수', 'chulsoo.kim@eval.com', '팀장', 1, 'USER'),
+(3, 'emp008', '{noop}1234', '이영희', 'younghee.lee@eval.com', '대리', 0, 'USER'),
+(3, 'emp009', '{noop}1234', '윤도현', 'dohyun.yoon@eval.com', '사원', 0, 'USER'),
 -- 마케팅팀 (dept 4): emp010 리더
-(4, 'emp010', '{noop}1234', '강지영', 'jiyoung.kang@eval.com', '팀장', TRUE, 'USER'),
-(4, 'emp011', '{noop}1234', '송승헌', 'seungheon.song@eval.com', '차장', FALSE, 'USER'),
-(4, 'emp012', '{noop}1234', '오나미', 'nami.oh@eval.com', '대리', FALSE, 'USER'),
+(4, 'emp010', '{noop}1234', '강지영', 'jiyoung.kang@eval.com', '팀장', 1, 'USER'),
+(4, 'emp011', '{noop}1234', '송승헌', 'seungheon.song@eval.com', '차장', 0, 'USER'),
+(4, 'emp012', '{noop}1234', '오나미', 'nami.oh@eval.com', '대리', 0, 'USER'),
 -- 인사팀 (dept 5): emp013 리더
-(5, 'emp013', '{noop}1234', '장동건', 'donggun.jang@eval.com', '팀장', TRUE, 'USER'),
-(5, 'emp014', '{noop}1234', '김태희', 'taehee.kim@eval.com', '사원', FALSE, 'USER'),
-(1, 'emp015', '{noop}1234', '유재석', 'jaesuk.yoo@eval.com', '부장', FALSE, 'USER'),
-(1, 'emp016', '{noop}1234', '이효리', 'hyori.lee@eval.com', '차장', FALSE, 'USER'),
-(1, 'emp017', '{noop}1234', '아이유', 'iu@eval.com', '신입', FALSE, 'USER'),
-(2, 'emp018', '{noop}1234', '박명수', 'myungsoo.park@eval.com', '차장', FALSE, 'USER'),
-(2, 'emp019', '{noop}1234', '정준하', 'junha.jung@eval.com', '과장', FALSE, 'USER'),
-(2, 'emp020', '{noop}1234', '노홍철', 'hongchul.noh@eval.com', '대리', FALSE, 'USER'),
-(3, 'emp021', '{noop}1234', '정형돈', 'hyungdon.jung@eval.com', '과장', FALSE, 'USER'),
-(3, 'emp022', '{noop}1234', '하하', 'haha@eval.com', '대리', FALSE, 'USER'),
-(3, 'emp023', '{noop}1234', '길', 'gil@eval.com', '사원', FALSE, 'USER'),
-(4, 'emp024', '{noop}1234', '황광희', 'kwanghee.hwang@eval.com', '대리', FALSE, 'USER'),
-(4, 'emp025', '{noop}1234', '조세호', 'seho.cho@eval.com', '사원', FALSE, 'USER'),
-(4, 'emp026', '{noop}1234', '남창희', 'changhee.nam@eval.com', '신입', FALSE, 'USER'),
-(5, 'emp027', '{noop}1234', '전소민', 'somin.jeon@eval.com', '대리', FALSE, 'USER'),
-(5, 'emp028', '{noop}1234', '양세찬', 'sechan.yang@eval.com', '사원', FALSE, 'USER'),
-(5, 'emp029', '{noop}1234', '이광수', 'kwangsoo.lee@eval.com', '주임', FALSE, 'USER'),
-(1, 'emp030', '{noop}1234', '유연석', 'yeonseok.yoo@eval.com', '사원', FALSE, 'USER');
+(5, 'emp013', '{noop}1234', '장동건', 'donggun.jang@eval.com', '팀장', 1, 'USER'),
+(5, 'emp014', '{noop}1234', '김태희', 'taehee.kim@eval.com', '사원', 0, 'USER'),
+(1, 'emp015', '{noop}1234', '유재석', 'jaesuk.yoo@eval.com', '부장', 0, 'USER'),
+(1, 'emp016', '{noop}1234', '이효리', 'hyori.lee@eval.com', '차장', 0, 'USER'),
+(1, 'emp017', '{noop}1234', '아이유', 'iu@eval.com', '신입', 0, 'USER'),
+(2, 'emp018', '{noop}1234', '박명수', 'myungsoo.park@eval.com', '차장', 0, 'USER'),
+(2, 'emp019', '{noop}1234', '정준하', 'junha.jung@eval.com', '과장', 0, 'USER'),
+(2, 'emp020', '{noop}1234', '노홍철', 'hongchul.noh@eval.com', '대리', 0, 'USER'),
+(3, 'emp021', '{noop}1234', '정형돈', 'hyungdon.jung@eval.com', '과장', 0, 'USER'),
+(3, 'emp022', '{noop}1234', '하하', 'haha@eval.com', '대리', 0, 'USER'),
+(3, 'emp023', '{noop}1234', '길', 'gil@eval.com', '사원', 0, 'USER'),
+(4, 'emp024', '{noop}1234', '황광희', 'kwanghee.hwang@eval.com', '대리', 0, 'USER'),
+(4, 'emp025', '{noop}1234', '조세호', 'seho.cho@eval.com', '사원', 0, 'USER'),
+(4, 'emp026', '{noop}1234', '남창희', 'changhee.nam@eval.com', '신입', 0, 'USER'),
+(5, 'emp027', '{noop}1234', '전소민', 'somin.jeon@eval.com', '대리', 0, 'USER'),
+(5, 'emp028', '{noop}1234', '양세찬', 'sechan.yang@eval.com', '사원', 0, 'USER'),
+(5, 'emp029', '{noop}1234', '이광수', 'kwangsoo.lee@eval.com', '주임', 0, 'USER'),
+(1, 'emp030', '{noop}1234', '유연석', 'yeonseok.yoo@eval.com', '사원', 0, 'USER');
 
 -- Evaluation Elements
 -- Performance (성과) Total 100%
@@ -205,3 +205,5 @@ INSERT INTO EVALUATOR_MAPPING (evaluatee_id, evaluator_id, eval_type) VALUES
 (29, 14, 'COMPETENCY'),
 (30, 14, 'COMPETENCY');
 
+-- Mark one employee as retired to test the status lockout
+UPDATE dbo.EMPLOYEE SET status = 'RETIRED' WHERE login_id = 'emp030';

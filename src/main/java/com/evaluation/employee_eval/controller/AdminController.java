@@ -55,6 +55,12 @@ public class AdminController {
         adminService.deleteEmployee(id);
         return "redirect:/admin/employees";
     }
+
+    @PostMapping("/employees/reset")
+    public String resetEmployee(@RequestParam Long id) {
+        adminService.resetEmployeeAccount(id);
+        return "redirect:/admin/employees";
+    }
     
     @GetMapping("/elements")
     public String elements(Model model) {

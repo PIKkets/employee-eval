@@ -2,77 +2,76 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head></head>
 <body>
-    <aside th:fragment="sidebar" class="sidebar bg-white shadow-sm vh-100 d-flex flex-column py-4 px-3" style="width: 260px; position: sticky; top: 0;">
-        <div class="brand d-flex align-items-center gap-2 mb-5 px-2 text-primary">
-            <i class="bi bi-bullseye fs-3"></i>
-            <span class="fs-4 fw-bold">E-Eval</span>
+    <aside th:fragment="sidebar" class="sidebar vh-100 d-flex flex-column py-4 px-3" style="width: 260px; position: sticky; top: 0; background-color: #1a1f36; box-shadow: 4px 0 12px rgba(0,0,0,0.15);">
+        <div class="brand d-flex align-items-center justify-content-center mb-5 px-2 py-2 rounded-3" style="background-color: #ffffff;">
+            <img th:src="@{/images/dfocus-logo.png}" alt="DFOCUS" style="height: 34px; object-fit: contain;">
         </div>
         
         <ul class="nav flex-column gap-2 mb-auto">
             <li class="nav-item">
-                <a href="/" class="nav-link text-dark fw-medium rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                <a href="/" class="nav-link text-white fw-medium rounded-3 px-3 py-2 d-flex align-items-center gap-3" style="opacity:0.9;">
                     <i class="bi bi-grid-1x2-fill"></i> 대시보드
                 </a>
             </li>
             
             <th:block th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-uppercase fw-bold" style="font-size: 0.7rem; color: rgba(255,255,255,0.45); letter-spacing: 0.08em;">
                     <span>관리자 메뉴</span>
                 </h6>
                 <li class="nav-item">
-                    <a href="/admin/departments" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                    <a href="/admin/departments" class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3" style="opacity:0.85;">
                         <i class="bi bi-diagram-3"></i> 부서 관리
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/admin/employees" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                    <a href="/admin/employees" class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3" style="opacity:0.85;">
                         <i class="bi bi-people"></i> 사원 관리
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/admin/elements" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                    <a href="/admin/elements" class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3" style="opacity:0.85;">
                         <i class="bi bi-list-check"></i> 평가요소 관리
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/admin/evaluators" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                    <a href="/admin/evaluators" class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3" style="opacity:0.85;">
                         <i class="bi bi-person-lines-fill"></i> 평가자 생성
                     </a>
                 </li>
                 <li class="nav-item mt-2">
-                    <a href="/admin/grades" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                    <a href="/admin/grades" class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3" style="opacity:0.85;">
                         <i class="bi bi-award"></i> 최종 등급 확정
                     </a>
                 </li>
             </th:block>
 
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-uppercase fw-bold" style="font-size: 0.7rem; color: rgba(255,255,255,0.45); letter-spacing: 0.08em;">
                 <span>평가 메뉴</span>
             </h6>
             <li class="nav-item">
-                <a href="/evaluation/performance" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                <a href="/evaluation/performance" class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3" style="opacity:0.85;">
                     <i class="bi bi-graph-up-arrow"></i> 성과 평가
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/evaluation/competency" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                <a href="/evaluation/competency" class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3" style="opacity:0.85;">
                     <i class="bi bi-star"></i> 역량 평가
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/evaluation/peer" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                <a href="/evaluation/peer" class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3" style="opacity:0.85;">
                     <i class="bi bi-people-fill"></i> 다면 평가
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/evaluation/interview" class="nav-link text-dark rounded-3 px-3 py-2 d-flex align-items-center gap-3">
+                <a href="/evaluation/interview" class="nav-link text-white rounded-3 px-3 py-2 d-flex align-items-center gap-3" style="opacity:0.85;">
                     <i class="bi bi-chat-dots"></i> 면담 평가
                 </a>
             </li>
         </ul>
         
-        <div class="mt-auto px-3 text-center text-muted" style="font-size: 0.8rem;">
-            &copy; 2026 E-Eval Corp.
+        <div class="mt-auto px-3 text-center" style="font-size: 0.75rem; color: rgba(255,255,255,0.35);">
+            &copy; 2026 DFOCUS Corp.
         </div>
     </aside>
 </body>

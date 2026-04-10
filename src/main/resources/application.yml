@@ -2,10 +2,10 @@ spring:
   application:
     name: employee-eval
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:file:./data/eval_db;AUTO_SERVER=TRUE
-    username: sa
-    password:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://211.232.94.161:1533;databaseName=SKUEDU;encrypt=true;trustServerCertificate=true
+    username: SKUEDU01
+    password: init000!
   sql:
     init:
       mode: never
@@ -17,6 +17,7 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
+
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
   type-aliases-package: com.evaluation.employee_eval.domain

@@ -16,6 +16,12 @@ public class Employee {
     private Double totalScore;
     private String finalGrade;
     
+    // Account Management 
+    private Integer failedAttempts;
+    private Boolean isLocked;
+    private String status;
+
+    
     // Virtual mapping Data
     private String departmentName;
 }

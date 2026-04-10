@@ -54,13 +54,12 @@
 
     <div class="login-card">
         <div class="text-center mb-4">
-            <i class="bi bi-bullseye text-primary" style="font-size: 3rem;"></i>
-            <h3 class="fw-bold mt-2">사원 평가 시스템</h3>
-            <p class="text-muted small">ID/비밀번호를 입력하여 로그인하세요.</p>
+            <img th:src="@{/images/dfocus-logo.png}" alt="DFOCUS" style="height: 48px; object-fit: contain; margin-bottom: 0.5rem;">
+            <h3 class="fw-bold mt-2">평가 시스템</h3>
+            <p class="text-muted small">사번과 비밀번호를 입력하여 로그인하세요.</p>
         </div>
 
-        <div th:if="${param.error}" class="alert alert-danger rounded-3 small">
-            아이디 또는 비밀번호가 올바르지 않습니다.
+        <div th:if="${param.error}" class="alert alert-danger rounded-3 small text-center" th:text="${param.exception != null ? param.exception : '아이디 또는 비밀번호가 일치하지 않습니다.'}">
         </div>
         <div th:if="${param.logout}" class="alert alert-info rounded-3 small">
             성공적으로 로그아웃 되었습니다.
@@ -73,15 +72,48 @@
             </div>
             <div class="mb-4">
                 <label class="form-label text-muted fw-semibold small">비밀번호</label>
-                <input type="password" name="password" class="form-control" required placeholder="기본 비밀번호: password">
+                <input type="password" name="password" class="form-control" required placeholder="비밀번호를 입력하세요">
             </div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="remember-me" id="rememberMe">
+                    <label class="form-check-label text-muted small" for="rememberMe">
+                        로그인 상태 유지
+                    </label>
+                </div>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#resetPasswordModal" class="text-decoration-none small text-primary fw-medium">비밀번호 찾기</a>
+            </div>
+            
             <button type="submit" class="btn btn-primary w-100">로그인</button>
         </form>
 
         <div class="text-center mt-4 text-muted" style="font-size: 0.8rem;">
-            &copy; 2026 E-Eval Corp. All Rights Reserved.
+            &copy; 2026 DFOCUS Corp. All Rights Reserved.
         </div>
     </div>
 
+    <!-- Password Reset Modal -->
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold" id="resetPasswordModalLabel">비밀번호 찾기</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center py-4">
+            <i class="bi bi-shield-lock text-primary mb-3" style="font-size: 3rem;"></i>
+            <p class="mb-1 fw-medium text-dark">비밀번호가 기억나지 않으시나요?</p>
+            <p class="text-muted small mb-0">비밀번호 초기화 및 계정 잠금 해제는<br>인사팀(<a href="mailto:admin@dfocus.com" class="text-decoration-none">admin@dfocus.com</a>)으로 문의 바랍니다.</p>
+          </div>
+          <div class="modal-footer border-0 pt-0 justify-content-center">
+            <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal">확인</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,5 +1,8 @@
 package com.evaluation.employee_eval.config;
 
+import com.evaluation.employee_eval.security.CustomAuthenticationFailureHandler;
+import com.evaluation.employee_eval.security.CustomAuthenticationSuccessHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,7 +13,11 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final CustomAuthenticationSuccessHandler successHandler;
+    private final CustomAuthenticationFailureHandler failureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -22,8 +29,14 @@ public class SecurityConfig {
             )
             .formLogin(login -> login
                 .loginPage("/login")
-                .defaultSuccessUrl("/", true)
+                .successHandler(successHandler)
+                .failureHandler(failureHandler)
                 .permitAll()
+            )
+            .rememberMe(rm -> rm
+                .key("dfocus-secret-key")
+                .tokenValiditySeconds(604800) // 7 days
+                .rememberMeParameter("remember-me")
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")

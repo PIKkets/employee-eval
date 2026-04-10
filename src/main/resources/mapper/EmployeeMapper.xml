@@ -41,4 +41,34 @@
         DELETE FROM EMPLOYEE WHERE id = #{id}
     </delete>
 
+    <update id="updateLoginFailure">
+        UPDATE EMPLOYEE 
+        SET failed_attempts = failed_attempts + 1
+        WHERE login_id = #{loginId}
+    </update>
+
+    <update id="lockAccount">
+        UPDATE EMPLOYEE
+        SET is_locked = 1
+        WHERE login_id = #{loginId}
+    </update>
+
+    <update id="resetLoginFailure">
+        UPDATE EMPLOYEE
+        SET failed_attempts = 0
+        WHERE login_id = #{loginId}
+    </update>
+
+    <update id="resetAccount">
+        UPDATE EMPLOYEE
+        SET failed_attempts = 0, is_locked = 0, password = '{noop}password'
+        WHERE id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        UPDATE EMPLOYEE
+        SET password = #{password}
+        WHERE id = #{id}
+    </update>
+
 </mapper>

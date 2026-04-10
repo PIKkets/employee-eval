@@ -27,6 +27,7 @@ public class AdminService {
     public List<Employee> getAllEmployees()           { return employeeMapper.findAll(); }
     public void addEmployee(Employee e)              { employeeMapper.insert(e); }
     public void deleteEmployee(Long id)              { employeeMapper.delete(id); }
+    public void resetEmployeeAccount(Long id)        { employeeMapper.resetAccount(id); }
 
     /** ADMIN 역할을 제외한 평가 대상 사원 목록 */
     public List<Employee> getEvaluatableEmployees() {

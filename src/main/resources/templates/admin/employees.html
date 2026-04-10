@@ -42,9 +42,13 @@
                                         <span class="badge" th:classappend="${emp.role == 'ADMIN'} ? 'bg-danger' : 'bg-primary'" th:text="${emp.role}">USER</span>
                                     </td>
                                     <td class="text-end pe-4">
+                                        <form th:action="@{/admin/employees/reset}" method="post" class="d-inline">
+                                            <input type="hidden" name="id" th:value="${emp.id}"/>
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary shadow-sm me-1" title="비밀번호 초기화 및 잠금 해제"><i class="bi bi-unlock"></i></button>
+                                        </form>
                                         <form th:action="@{/admin/employees/delete}" method="post" class="d-inline">
                                             <input type="hidden" name="id" th:value="${emp.id}"/>
-                                            <button class="btn btn-sm btn-outline-danger shadow-sm"><i class="bi bi-trash"></i></button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="사원 삭제" onclick="return confirm('사원을 삭제하시겠습니까?');"><i class="bi bi-trash"></i></button>
                                         </form>
                                     </td>
                                 </tr>
