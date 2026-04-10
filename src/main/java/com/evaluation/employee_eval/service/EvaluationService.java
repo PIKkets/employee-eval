@@ -1,20 +1,15 @@
 package com.evaluation.employee_eval.service;
 
-import com.evaluation.employee_eval.domain.EvaluationElement;
-import com.evaluation.employee_eval.domain.EvaluationScore;
-import com.evaluation.employee_eval.domain.EvaluatorMapping;
-import com.evaluation.employee_eval.mapper.EvaluationElementMapper;
-import com.evaluation.employee_eval.mapper.EvaluationScoreMapper;
-import com.evaluation.employee_eval.mapper.EmployeeMapper;
-import com.evaluation.employee_eval.mapper.EvaluatorMappingMapper;
+import com.evaluation.employee_eval.domain.*;
+import com.evaluation.employee_eval.mapper.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.evaluation.employee_eval.domain.EvaluationFormData;
-import com.evaluation.employee_eval.domain.EvaluationFormDto;
-import com.evaluation.employee_eval.domain.Employee;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,203 +21,212 @@ public class EvaluationService {
     private final EvaluationScoreMapper scoreMapper;
     private final EmployeeMapper employeeMapper;
 
-    public List<EvaluatorMapping> getMyTasks(Long evaluatorId, String evalType) {
-        return mappingMapper.findByEvaluatorAndType(evaluatorId, evalType);
-    }
+    // -------------------------------------------------------------------------
+    // 평가 목록 조회
+    // -------------------------------------------------------------------------
 
     public List<EvaluatorMapping> getMyTasksWithStatus(Long evaluatorId, String evalType) {
-        List<EvaluatorMapping> tasks = getMyTasks(evaluatorId, evalType);
-        boolean isTwoStepList = "PERFORMANCE".equals(evalType) || "COMPETENCY".equals(evalType);
-        
-        if (isTwoStepList) {
+        List<EvaluatorMapping> tasks = mappingMapper.findByEvaluatorAndType(evaluatorId, evalType);
+
+        if (EvalType.isTwoStep(evalType)) {
             tasks.forEach(task -> {
                 boolean isSelf = task.getEvaluateeId().equals(task.getEvaluatorId());
                 if (!isSelf) {
-                    List<EvaluationScore> selfScores = getSelfExistingScores(task.getEvaluateeId(), evalType);
-                    task.setSelfEvalStatus((selfScores != null && !selfScores.isEmpty()) ? "DONE" : "PENDING");
+                    boolean selfDone = isSelfEvaluationDone(task.getEvaluateeId(), evalType);
+                    task.setSelfEvalStatus(selfDone ? "DONE" : "PENDING");
                 }
             });
         }
         return tasks;
     }
-    
-    public List<Employee> getAllEmployeesExcept(Long currentId) {
+
+    public List<Employee> getAllEmployeesExcept(Long excludeId) {
         return employeeMapper.findAll().stream()
-                .filter(emp -> !emp.getId().equals(currentId))
+                .filter(emp -> !emp.getId().equals(excludeId))
                 .collect(Collectors.toList());
     }
 
+    // -------------------------------------------------------------------------
+    // 매핑 관리
+    // -------------------------------------------------------------------------
+
     @Transactional
     public void addPeerMapping(Long evaluatorId, Long evaluateeId) {
-        // Prevent duplicate mapping
-        EvaluatorMapping existing = mappingMapper.findByEvaluateeAndEvaluatorAndType(evaluateeId, evaluatorId, "PEER");
-        if (existing == null) {
-            EvaluatorMapping mapping = new EvaluatorMapping();
-            mapping.setEvaluatorId(evaluatorId);
-            mapping.setEvaluateeId(evaluateeId);
-            mapping.setEvalType("PEER");
-            mappingMapper.insert(mapping);
+        if (mappingMapper.findByEvaluateeAndEvaluatorAndType(evaluateeId, evaluatorId, EvalType.PEER) == null) {
+            mappingMapper.insert(buildMapping(evaluatorId, evaluateeId, EvalType.PEER));
         }
     }
 
     @Transactional
     public void generateInterviewMappings(Employee currentUser) {
         if (Boolean.TRUE.equals(currentUser.getIsLeader())) {
-            // Leader evaluates all team members
-            List<Employee> teamMembers = employeeMapper.findAll().stream()
-                    .filter(e -> currentUser.getDepartmentId().equals(e.getDepartmentId()) && !e.getId().equals(currentUser.getId()))
-                    .collect(Collectors.toList());
-            for (Employee member : teamMembers) {
-                addInterviewMapping(currentUser.getId(), member.getId());
-            }
+            // 팀장: 같은 부서의 팀원 전체를 평가 대상으로 등록
+            employeeMapper.findAll().stream()
+                    .filter(e -> currentUser.getDepartmentId().equals(e.getDepartmentId())
+                            && !e.getId().equals(currentUser.getId()))
+                    .forEach(member -> addInterviewMappingIfAbsent(currentUser.getId(), member.getId()));
         } else {
-            // Member evaluates their leader
-            Employee leader = employeeMapper.findAll().stream()
-                    .filter(e -> currentUser.getDepartmentId().equals(e.getDepartmentId()) && Boolean.TRUE.equals(e.getIsLeader()))
-                    .findFirst().orElse(null);
-            if (leader != null) {
-                addInterviewMapping(currentUser.getId(), leader.getId());
-            }
+            // 팀원: 자신의 팀장을 평가 대상으로 등록
+            employeeMapper.findAll().stream()
+                    .filter(e -> currentUser.getDepartmentId().equals(e.getDepartmentId())
+                            && Boolean.TRUE.equals(e.getIsLeader()))
+                    .findFirst()
+                    .ifPresent(leader -> addInterviewMappingIfAbsent(currentUser.getId(), leader.getId()));
         }
     }
 
-    private void addInterviewMapping(Long evaluatorId, Long evaluateeId) {
-        EvaluatorMapping existing = mappingMapper.findByEvaluateeAndEvaluatorAndType(evaluateeId, evaluatorId, "INTERVIEW");
-        if (existing == null) {
-            EvaluatorMapping mapping = new EvaluatorMapping();
-            mapping.setEvaluatorId(evaluatorId);
-            mapping.setEvaluateeId(evaluateeId);
-            mapping.setEvalType("INTERVIEW");
-            mappingMapper.insert(mapping);
+    // -------------------------------------------------------------------------
+    // 평가 폼 데이터 조회
+    // -------------------------------------------------------------------------
+
+    public EvaluationFormData getEvaluationFormData(Long mappingId, String evalType, Long currentUserId) {
+        EvaluatorMapping mapping = mappingMapper.findById(mappingId);
+        if (mapping == null || !mapping.getEvaluatorId().equals(currentUserId)) {
+            return null; // 권한 없음 또는 존재하지 않음
         }
-    }
-    
-    public EvaluatorMapping getMapping(Long mappingId) {
-        return mappingMapper.findById(mappingId);
+
+        boolean isSelf   = mapping.getEvaluatorId().equals(mapping.getEvaluateeId());
+        boolean isTwoStep = EvalType.isTwoStep(evalType);
+        boolean isLocked = false;
+        List<EvaluationScore> selfScores = null;
+
+        if (isTwoStep && !isSelf) {
+            selfScores = getSelfScores(mapping.getEvaluateeId(), evalType.toUpperCase());
+            isLocked = selfScores == null || selfScores.isEmpty();
+        }
+
+        EvaluationFormDto formDto = buildFormDto(mappingId, evalType, isSelf, isLocked, selfScores);
+
+        EvaluationFormData formData = new EvaluationFormData();
+        formData.setMapping(mapping);
+        formData.setFormDto(formDto);
+        formData.setSelf(isSelf);
+        formData.setLocked(isLocked);
+        formData.setEvalTypeLower(evalType.toLowerCase());
+        formData.setHistoryData(buildHistoryData(evalType, mapping));
+        return formData;
     }
 
-    public List<EvaluationElement> getElementsByType(String evalType) {
-        return elementMapper.findByType(evalType);
-    }
-    
-    public List<EvaluationScore> getExistingScores(Long mappingId) {
-        return scoreMapper.findByMappingId(mappingId);
-    }
-    public List<EvaluationScore> getSelfExistingScores(Long evaluateeId, String evalType) {
-        EvaluatorMapping selfMapping = mappingMapper.findByEvaluateeAndEvaluatorAndType(evaluateeId, evaluateeId, evalType);
-        if (selfMapping == null) return null;
-        return scoreMapper.findByMappingId(selfMapping.getId());
-    }
-
-    @Transactional
-    public EvaluatorMapping getOrCreateSelfMapping(Long evaluateeId, String evalType) {
-        EvaluatorMapping selfMapping = mappingMapper.findByEvaluateeAndEvaluatorAndType(evaluateeId, evaluateeId, evalType);
-        if (selfMapping == null) {
-            selfMapping = new EvaluatorMapping();
-            selfMapping.setEvaluateeId(evaluateeId);
-            selfMapping.setEvaluatorId(evaluateeId);
-            selfMapping.setEvalType(evalType);
-            mappingMapper.insert(selfMapping);
-        }
-        return selfMapping;
-    }
+    // -------------------------------------------------------------------------
+    // 평가 제출
+    // -------------------------------------------------------------------------
 
     @Transactional
     public void submitEvaluation(Long mappingId, List<EvaluationScore> scores) {
-        // Clear previous scores
         scoreMapper.deleteByMappingId(mappingId);
-        // Insert new scores
-        for (EvaluationScore score : scores) {
+        scores.forEach(score -> {
             score.setMappingId(mappingId);
             scoreMapper.insert(score);
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // private 헬퍼
+    // -------------------------------------------------------------------------
+
+    private boolean isSelfEvaluationDone(Long evaluateeId, String evalType) {
+        List<EvaluationScore> scores = getSelfScores(evaluateeId, evalType);
+        return scores != null && !scores.isEmpty();
+    }
+
+    private List<EvaluationScore> getSelfScores(Long evaluateeId, String evalType) {
+        EvaluatorMapping selfMapping = mappingMapper.findByEvaluateeAndEvaluatorAndType(
+                evaluateeId, evaluateeId, evalType.toUpperCase());
+        return selfMapping == null ? null : scoreMapper.findByMappingId(selfMapping.getId());
+    }
+
+    private void addInterviewMappingIfAbsent(Long evaluatorId, Long evaluateeId) {
+        if (mappingMapper.findByEvaluateeAndEvaluatorAndType(evaluateeId, evaluatorId, EvalType.INTERVIEW) == null) {
+            mappingMapper.insert(buildMapping(evaluatorId, evaluateeId, EvalType.INTERVIEW));
         }
     }
 
-    public EvaluationFormData getEvaluationFormData(Long mappingId, String evalType, Long currentUserId) {
-        EvaluatorMapping mapping = getMapping(mappingId);
-        if (mapping == null || !mapping.getEvaluatorId().equals(currentUserId)) {
-            return null; // Signals unauthorized or not found
-        }
+    private EvaluatorMapping buildMapping(Long evaluatorId, Long evaluateeId, String evalType) {
+        EvaluatorMapping mapping = new EvaluatorMapping();
+        mapping.setEvaluatorId(evaluatorId);
+        mapping.setEvaluateeId(evaluateeId);
+        mapping.setEvalType(evalType);
+        return mapping;
+    }
 
-        List<EvaluationElement> elements = getElementsByType(evalType.toUpperCase());
-        List<EvaluationScore> existingScores = getExistingScores(mappingId);
-        
-        boolean isSelf = mapping.getEvaluatorId().equals(mapping.getEvaluateeId());
-        boolean isManager = !isSelf;
-        boolean isLocked = false;
-        
-        boolean isTwoStep = "PERFORMANCE".equalsIgnoreCase(evalType) || "COMPETENCY".equalsIgnoreCase(evalType);
-        List<EvaluationScore> selfScores = null;
-        
-        if (isTwoStep && isManager) {
-            selfScores = getSelfExistingScores(mapping.getEvaluateeId(), evalType.toUpperCase());
-            if (selfScores == null || selfScores.isEmpty()) {
-                isLocked = true;
-            }
-        }
-        
+    private EvaluationFormDto buildFormDto(Long mappingId, String evalType,
+                                           boolean isSelf, boolean isLocked,
+                                           List<EvaluationScore> selfScores) {
+        List<EvaluationElement> elements = elementMapper.findByType(evalType.toUpperCase());
+        List<EvaluationScore> existingScores = scoreMapper.findByMappingId(mappingId);
+
+        List<EvaluationScore> scores = elements.stream()
+                .map(element -> toScoreRow(element, existingScores, isSelf, isLocked, selfScores))
+                .collect(Collectors.toList());
+
         EvaluationFormDto formDto = new EvaluationFormDto();
         formDto.setMappingId(mappingId);
-        List<EvaluationScore> scores = new ArrayList<>();
-        
-        for (EvaluationElement element : elements) {
-            EvaluationScore score = new EvaluationScore();
-            score.setElementId(element.getId());
-            score.setElementName(element.getName());
-            score.setElementWeight(element.getWeight());
-            
-            existingScores.stream()
+        formDto.setScores(scores);
+        return formDto;
+    }
+
+    private EvaluationScore toScoreRow(EvaluationElement element,
+                                       List<EvaluationScore> existingScores,
+                                       boolean isSelf, boolean isLocked,
+                                       List<EvaluationScore> selfScores) {
+        EvaluationScore score = new EvaluationScore();
+        score.setElementId(element.getId());
+        score.setElementName(element.getName());
+        score.setElementWeight(element.getWeight());
+
+        // 기존 점수 복원
+        existingScores.stream()
                 .filter(s -> s.getElementId().equals(element.getId()))
                 .findFirst()
                 .ifPresent(s -> {
                     score.setScore(s.getScore());
                     score.setComment(s.getComment());
                 });
-            
-            if (score.getScore() == null) {
-                score.setScore(isSelf ? 0 : null);
-            }
-                
-            if (isManager && isTwoStep && !isLocked && selfScores != null) {
-                selfScores.stream()
+
+        // 점수 미입력 시 기본값
+        if (score.getScore() == null) {
+            score.setScore(isSelf ? 0 : null);
+        }
+
+        // 관리자 뷰: 자가 평가 코멘트 첨부
+        boolean isManager = !isSelf;
+        if (isManager && !isLocked && selfScores != null) {
+            selfScores.stream()
                     .filter(s -> s.getElementId().equals(element.getId()))
                     .findFirst()
                     .ifPresent(s -> score.setSelfComment(s.getComment()));
-            }
-                
-            scores.add(score);
         }
-        formDto.setScores(scores);
-        
-        java.util.Map<String, List<EvaluationScore>> historyData = new java.util.HashMap<>();
-        if ("INTERVIEW".equalsIgnoreCase(evalType)) {
-            Long evaluateeId = mapping.getEvaluateeId();
-            List<EvaluatorMapping> historyMappings = mappingMapper.findAll().stream()
-                .filter(m -> m.getEvaluateeId().equals(evaluateeId) && !"INTERVIEW".equalsIgnoreCase(m.getEvalType()))
-                .collect(Collectors.toList());
-            
-            for (EvaluatorMapping hm : historyMappings) {
-                List<EvaluationScore> hmScores = scoreMapper.findByMappingId(hm.getId());
-                if (!hmScores.isEmpty()) {
-                    boolean isSelfHistory = hm.getEvaluatorId().equals(hm.getEvaluateeId());
-                    for (EvaluationScore s : hmScores) {
-                        String prefix = isSelfHistory ? "[본인] " : (hm.getEvalType().equals("PEER") ? "[동료] " : "[팀장] ");
-                        s.setElementName(prefix + s.getElementName());
+
+        return score;
+    }
+
+    private Map<String, List<EvaluationScore>> buildHistoryData(String evalType, EvaluatorMapping mapping) {
+        if (!EvalType.INTERVIEW.equalsIgnoreCase(evalType)) {
+            return new HashMap<>();
+        }
+
+        Map<String, List<EvaluationScore>> historyData = new HashMap<>();
+        Long evaluateeId = mapping.getEvaluateeId();
+
+        mappingMapper.findAll().stream()
+                .filter(m -> m.getEvaluateeId().equals(evaluateeId)
+                        && !EvalType.INTERVIEW.equalsIgnoreCase(m.getEvalType()))
+                .forEach(hm -> {
+                    List<EvaluationScore> hmScores = scoreMapper.findByMappingId(hm.getId());
+                    if (!hmScores.isEmpty()) {
+                        String prefix = resolveHistoryPrefix(hm);
+                        hmScores.forEach(s -> s.setElementName(prefix + s.getElementName()));
+                        historyData.computeIfAbsent(hm.getEvalType(), k -> new ArrayList<>())
+                                .addAll(hmScores);
                     }
-                    historyData.computeIfAbsent(hm.getEvalType(), k -> new ArrayList<>()).addAll(hmScores);
-                }
-            }
-        }
-        
-        EvaluationFormData formData = new EvaluationFormData();
-        formData.setMapping(mapping);
-        formData.setFormDto(formDto);
-        formData.setSelf(isSelf);
-        formData.setManager(isManager);
-        formData.setLocked(isLocked);
-        formData.setEvalTypeLower(evalType.toLowerCase());
-        formData.setHistoryData(historyData);
-        
-        return formData;
+                });
+
+        return historyData;
+    }
+
+    private String resolveHistoryPrefix(EvaluatorMapping hm) {
+        if (hm.getEvaluatorId().equals(hm.getEvaluateeId())) return "[본인] ";
+        if (EvalType.PEER.equals(hm.getEvalType()))          return "[동료] ";
+        return "[팀장] ";
     }
 }

@@ -1,6 +1,9 @@
 package com.evaluation.employee_eval.controller;
 
-import com.evaluation.employee_eval.domain.*;
+import com.evaluation.employee_eval.domain.Department;
+import com.evaluation.employee_eval.domain.Employee;
+import com.evaluation.employee_eval.domain.EvaluationElement;
+import com.evaluation.employee_eval.domain.EvaluatorMapping;
 import com.evaluation.employee_eval.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -41,8 +44,7 @@ public class AdminController {
     
     @PostMapping("/employees/add")
     public String addEmployee(Employee emp) {
-        // dummy password for now since security is not fully hashing yet, but we use a stub
-        emp.setPassword("{noop}1234");
+        emp.setPassword("{noop}1234"); // BCrypt 미적용 환경용 평문 패스워드
         if (emp.getRole() == null) emp.setRole("USER");
         adminService.addEmployee(emp);
         return "redirect:/admin/employees";
