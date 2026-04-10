@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.evaluation.employee_eval.mapper.EvaluationTypeWeightMapper">
+
+    <select id="findAll" resultType="com.evaluation.employee_eval.domain.EvaluationTypeWeight">
+        SELECT * FROM EVALUATION_TYPE_WEIGHT ORDER BY eval_type
+    </select>
+
+    <select id="findByType" resultType="com.evaluation.employee_eval.domain.EvaluationTypeWeight">
+        SELECT * FROM EVALUATION_TYPE_WEIGHT WHERE eval_type = #{evalType}
+    </select>
+
+    <insert id="insertOrUpdate">
+        MERGE INTO EVALUATION_TYPE_WEIGHT AS target
+        USING (SELECT #{evalType} AS eval_type, #{weight} AS weight) AS source
+        ON target.eval_type = source.eval_type
+        WHEN MATCHED THEN
+            UPDATE SET weight = source.weight
+        WHEN NOT MATCHED THEN
+            INSERT (eval_type, weight) VALUES (source.eval_type, source.weight);
+    </insert>
+
+</mapper>

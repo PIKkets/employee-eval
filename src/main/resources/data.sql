@@ -207,3 +207,17 @@ INSERT INTO EVALUATOR_MAPPING (evaluatee_id, evaluator_id, eval_type) VALUES
 
 -- Mark one employee as retired to test the status lockout
 UPDATE dbo.EMPLOYEE SET status = 'RETIRED' WHERE login_id = 'emp030';
+
+-- Set department heads based on dummy data leaders
+UPDATE dbo.DEPARTMENT SET head_id = 2 WHERE id = 1; -- 기획팀 emp001
+UPDATE dbo.DEPARTMENT SET head_id = 5 WHERE id = 2; -- 개발1팀 emp004
+UPDATE dbo.DEPARTMENT SET head_id = 8 WHERE id = 3; -- 개발2팀 emp007
+UPDATE dbo.DEPARTMENT SET head_id = 11 WHERE id = 4; -- 마케팅팀 emp010
+UPDATE dbo.DEPARTMENT SET head_id = 14 WHERE id = 5; -- 인사팀 emp013
+
+-- Set evaluation type weights
+INSERT INTO EVALUATION_TYPE_WEIGHT (eval_type, weight) VALUES 
+('PERFORMANCE', 40),
+('COMPETENCY', 40),
+('PEER', 10),
+('INTERVIEW', 10);

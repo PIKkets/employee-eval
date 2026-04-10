@@ -6,6 +6,7 @@ import java.util.List;
 
 @Mapper
 public interface DepartmentMapper {
+    List<Department> findAllWithDetails();
     List<Department> findAll();
     Department findById(Long id);
     void insert(Department department);

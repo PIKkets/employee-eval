@@ -6,4 +6,11 @@ import lombok.Data;
 public class Department {
     private Long id;
     private String name;
+    private Long parentId;
+    private Long headId;
+    private Boolean isActive;
+    
+    // For UI Display
+    private String parentName;
+    private String headName;
 }

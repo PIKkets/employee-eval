@@ -18,7 +18,7 @@
 
                 <div class="row g-4">
                     <!-- Dept List -->
-                    <div class="col-md-8">
+                    <div class="col-md-9">
                         <div class="card p-4 shadow-sm border-0">
                             <h5 class="fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>조직 부서 목록</h5>
                             <div class="table-responsive">
@@ -26,23 +26,75 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>ID</th>
+                                            <th>상위부서</th>
                                             <th>부서명</th>
+                                            <th>부서장</th>
+                                            <th>상태</th>
                                             <th class="text-end">관리</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr th:each="dept : ${departments}">
                                             <td th:text="${dept.id}">1</td>
+                                            <td class="text-muted" th:text="${dept.parentName}"></td>
                                             <td class="fw-bold text-dark" th:text="${dept.name}">기획팀</td>
+                                            <td th:text="${dept.headName}">홍길동</td>
+                                            <td>
+                                                <span class="badge rounded-pill" th:classappend="${dept.isActive} ? 'bg-success' : 'bg-secondary'" th:text="${dept.isActive} ? '활성' : '비활성'">활성</span>
+                                            </td>
                                             <td class="text-end">
+                                                <button type="button" class="btn btn-sm btn-outline-primary shadow-sm" data-bs-toggle="modal" th:data-bs-target="'#editDeptModal' + ${dept.id}"><i class="bi bi-pencil"></i></button>
                                                 <form th:action="@{/admin/departments/delete}" method="post" class="d-inline">
                                                     <input type="hidden" name="id" th:value="${dept.id}"/>
                                                     <button class="btn btn-sm btn-outline-danger shadow-sm"><i class="bi bi-trash"></i></button>
                                                 </form>
+
+                                                <!-- Edit Modal -->
+                                                <div class="modal fade text-start" th:id="'editDeptModal' + ${dept.id}" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content border-0 shadow">
+                                                            <div class="modal-header border-0 pb-0">
+                                                                <h5 class="modal-title fw-bold">부서 수정</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <form th:action="@{/admin/departments/update}" method="post">
+                                                                <div class="modal-body">
+                                                                    <input type="hidden" name="id" th:value="${dept.id}">
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label text-muted fw-semibold">부서명</label>
+                                                                        <input type="text" name="name" class="form-control" th:value="${dept.name}" required>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label text-muted fw-semibold">상위부서</label>
+                                                                        <select name="parentId" class="form-select">
+                                                                            <option value="">- 없음 -</option>
+                                                                            <option th:each="pDept : ${departments}" th:if="${pDept.id != dept.id}" th:value="${pDept.id}" th:text="${pDept.name}" th:selected="${dept.parentId == pDept.id}"></option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label text-muted fw-semibold">부서장</label>
+                                                                        <select name="headId" class="form-select">
+                                                                            <option value="">- 지정 안함 -</option>
+                                                                            <option th:each="emp : ${employees}" th:value="${emp.id}" th:text="|${emp.name} (${emp.position})|" th:selected="${dept.headId == emp.id}"></option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="form-check form-switch mb-3">
+                                                                        <input class="form-check-input" type="checkbox" name="isActive" value="true" th:id="'flexSwitch' + ${dept.id}" th:checked="${dept.isActive}">
+                                                                        <label class="form-check-label" th:for="'flexSwitch' + ${dept.id}">부서 활성화 유무</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer border-0 p-3 pt-0">
+                                                                    <button type="submit" class="btn btn-primary w-100 shadow-sm fw-bold">저장하기</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </td>
                                         </tr>
                                         <tr th:if="${#lists.isEmpty(departments)}">
-                                            <td colspan="3" class="text-center text-muted py-4">등록된 부서가 없습니다.</td>
+                                            <td colspan="6" class="text-center text-muted py-4">등록된 부서가 없습니다.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -51,15 +103,29 @@
                     </div>
 
                     <!-- Add Dept -->
-                    <div class="col-md-4">
-                        <div class="card p-4 shadow-sm border-0 border-top border-primary border-4">
-                            <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle me-2"></i>부서 등록</h5>
+                    <div class="col-md-3">
+                        <div class="card p-4 shadow-sm border-0 border-top border-primary border-4 sticky-top" style="top: 2rem;">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle me-2"></i>새 부서 등록</h5>
                             <form th:action="@{/admin/departments/add}" method="post">
                                 <div class="mb-3">
-                                    <label class="form-label text-muted fw-semibold">부서명</label>
-                                    <input type="text" name="name" class="form-control" required placeholder="예: 인사팀">
+                                    <label class="form-label text-muted fw-semibold mb-1">부서명</label>
+                                    <input type="text" name="name" class="form-control form-control-sm" required placeholder="예: 신사업팀">
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100 shadow-sm fw-bold">등록하기</button>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted fw-semibold mb-1">상위부서</label>
+                                    <select name="parentId" class="form-select form-select-sm">
+                                        <option value="">- 최상위 조직 -</option>
+                                        <option th:each="pDept : ${departments}" th:value="${pDept.id}" th:text="${pDept.name}"></option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label text-muted fw-semibold mb-1">부서장 지정</label>
+                                    <select name="headId" class="form-select form-select-sm">
+                                        <option value="">- 미지정 -</option>
+                                        <option th:each="emp : ${employees}" th:value="${emp.id}" th:text="|${emp.name} (${emp.position})|"></option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm w-100 shadow-sm fw-bold">추가하기</button>
                             </form>
                         </div>
                     </div>

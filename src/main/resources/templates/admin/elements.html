@@ -16,11 +16,32 @@
                     <h2 class="fw-bold mb-0">평가요소 관리</h2>
                 </div>
 
+                <div class="row g-4 mb-4">
+                    <div class="col-12">
+                        <div class="card p-4 shadow-sm border-0 border-top border-warning border-4">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-percent me-2"></i>최종 등급 산출용 평가 유형별 가중치</h5>
+                            <div class="row g-3">
+                                <div class="col-md-3" th:each="tw : ${weights}">
+                                    <form th:action="@{/admin/elements/weight/update}" method="post" class="d-flex align-items-center">
+                                        <input type="hidden" name="evalType" th:value="${tw.evalType}">
+                                        <div class="input-group input-group-sm shadow-sm">
+                                            <span class="input-group-text fw-bold text-dark" style="width: 120px;" th:text="${tw.evalType}">PERFORMANCE</span>
+                                            <input type="number" name="weight" class="form-control text-center" th:value="${tw.weight}" min="0" max="100" required>
+                                            <span class="input-group-text">%</span>
+                                            <button class="btn btn-outline-primary fw-bold" type="submit">저장</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row g-4">
                     <!-- Elements List -->
                     <div class="col-md-8">
                         <div class="card p-4 shadow-sm border-0">
-                            <h5 class="fw-bold mb-3"><i class="bi bi-list-check me-2"></i>등록된 평가 기준</h5>
+                            <h5 class="fw-bold mb-3"><i class="bi bi-list-check me-2"></i>등록된 평가 기준(문항)</h5>
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle">
                                     <thead class="table-light">

@@ -19,4 +19,12 @@
         DELETE FROM EVALUATION_SCORE WHERE mapping_id = #{mappingId}
     </delete>
 
+    <delete id="deleteScoresByEmployeeId">
+        DELETE FROM EVALUATION_SCORE 
+        WHERE mapping_id IN (
+            SELECT id FROM EVALUATOR_MAPPING 
+            WHERE evaluatee_id = #{employeeId} OR evaluator_id = #{employeeId}
+        )
+    </delete>
+
 </mapper>

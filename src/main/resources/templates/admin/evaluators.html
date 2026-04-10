@@ -14,6 +14,11 @@
             <main class="content-area p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="fw-bold mb-0">평가자 매핑 관리</h2>
+                    <form th:action="@{/admin/evaluators/auto-generate}" method="post">
+                        <button type="submit" class="btn btn-warning shadow-sm fw-bold">
+                            평가자 자동 생성 (부서 기반)
+                        </button>
+                    </form>
                 </div>
 
                 <div class="row g-4">

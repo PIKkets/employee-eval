@@ -24,7 +24,7 @@ public class DatabaseInitConfig {
             try (Connection conn = dataSource.getConnection();
                  Statement stmt = conn.createStatement()) {
 
-                boolean hasData = hasEmployeeData(stmt);
+                boolean hasData = false; // FORCE RESET
 
                 if (!hasData) {
                     System.out.println("========== Initializing database schema and data ==========");
@@ -34,6 +34,9 @@ public class DatabaseInitConfig {
                     dropConstraintIfExists(stmt, "FK_EVAL_MAP_EVALUATOR","foreign_keys",    "EVALUATOR_MAPPING");
                     dropConstraintIfExists(stmt, "FK_EVAL_EMP_DEPT",     "foreign_keys",    "EMPLOYEE");
                     dropConstraintIfExists(stmt, "UQ_EVAL_EMP_LOGIN",    "key_constraints", "EMPLOYEE");
+                    dropConstraintIfExists(stmt, "FK_DEPT_PARENT",       "foreign_keys",    "DEPARTMENT");
+                    dropConstraintIfExists(stmt, "FK_DEPT_HEAD",         "foreign_keys",    "DEPARTMENT");
+                    dropTableIfExists(stmt, "EVALUATION_TYPE_WEIGHT");
                     dropTableIfExists(stmt, "EVALUATION_SCORE");
                     dropTableIfExists(stmt, "EVALUATOR_MAPPING");
                     dropTableIfExists(stmt, "EVALUATION_ELEMENT");

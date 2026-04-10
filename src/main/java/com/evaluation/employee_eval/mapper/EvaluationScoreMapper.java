@@ -9,4 +9,5 @@ public interface EvaluationScoreMapper {
     List<EvaluationScore> findByMappingId(Long mappingId);
     void insert(EvaluationScore score);
     void deleteByMappingId(Long mappingId);
+    void deleteScoresByEmployeeId(@org.apache.ibatis.annotations.Param("employeeId") Long employeeId);
 }

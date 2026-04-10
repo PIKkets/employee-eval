@@ -20,6 +20,7 @@ public class AdminController {
     @GetMapping("/departments")
     public String departments(Model model) {
         model.addAttribute("departments", adminService.getAllDepartments());
+        model.addAttribute("employees", adminService.getAllEmployees());
         return "admin/departments";
     }
     
@@ -35,6 +36,16 @@ public class AdminController {
         return "redirect:/admin/departments";
     }
 
+    @PostMapping("/departments/update")
+    public String updateDepartment(Department dept) {
+        if (dept.getIsActive() == null) {
+            dept.setIsActive(false); // HTML checkbox empty means false
+        }
+        // Assuming adminService.updateDepartment exists - wait I need to add it to AdminService!
+        adminService.updateDepartment(dept);
+        return "redirect:/admin/departments";
+    }
+
     @GetMapping("/employees")
     public String employees(Model model) {
         model.addAttribute("employees", adminService.getAllEmployees());
@@ -43,8 +54,11 @@ public class AdminController {
     }
     
     @PostMapping("/employees/add")
-    public String addEmployee(Employee emp) {
-        emp.setPassword("{noop}1234"); // BCrypt 미적용 환경용 평문 패스워드
+    public String addEmployee(@ModelAttribute Employee emp) {
+        emp.setPassword("{noop}1234");
+        if (emp.getIsLeader() == null) {
+            emp.setIsLeader(false);
+        }
         if (emp.getRole() == null) emp.setRole("USER");
         adminService.addEmployee(emp);
         return "redirect:/admin/employees";
@@ -65,6 +79,7 @@ public class AdminController {
     @GetMapping("/elements")
     public String elements(Model model) {
         model.addAttribute("elements", adminService.getAllElements());
+        model.addAttribute("weights", adminService.getAllWeights());
         return "admin/elements";
     }
 
@@ -80,6 +95,15 @@ public class AdminController {
         return "redirect:/admin/elements";
     }
 
+    @PostMapping("/elements/weight/update")
+    public String updateWeight(@RequestParam String evalType, @RequestParam Integer weight) {
+        com.evaluation.employee_eval.domain.EvaluationTypeWeight w = new com.evaluation.employee_eval.domain.EvaluationTypeWeight();
+        w.setEvalType(evalType);
+        w.setWeight(weight);
+        adminService.updateWeight(w);
+        return "redirect:/admin/elements";
+    }
+
     @GetMapping("/evaluators")
     public String evaluators(Model model) {
         model.addAttribute("mappings", adminService.getAllMappings());
@@ -89,6 +113,9 @@ public class AdminController {
 
     @PostMapping("/evaluators/add")
     public String addEvaluator(EvaluatorMapping mapping) {
+        if (mapping.getIsAnonymous() == null) {
+            mapping.setIsAnonymous(false);
+        }
         adminService.addMapping(mapping);
         return "redirect:/admin/evaluators";
     }
@@ -96,6 +123,12 @@ public class AdminController {
     @PostMapping("/evaluators/delete")
     public String deleteEvaluator(@RequestParam Long id) {
         adminService.deleteMapping(id);
+        return "redirect:/admin/evaluators";
+    }
+
+    @PostMapping("/evaluators/auto-generate")
+    public String autoGenerateEvaluators() {
+        adminService.autoGenerateMappings();
         return "redirect:/admin/evaluators";
     }
 }
